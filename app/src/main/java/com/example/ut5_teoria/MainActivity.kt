@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,10 +24,14 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.ut5_teoria.ui.theme.UT5_teoriaTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +77,9 @@ fun GreetingPreview() {
 
 @Composable
 fun CustomScaffold() {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val corutina = rememberCoroutineScope()
+
     Scaffold(
         // Barra superior
         topBar = {
@@ -80,6 +89,8 @@ fun CustomScaffold() {
             //MyTopAppBarMedium()
             //MyTopAppBarLarge()
         },
+        //Snackbar
+        snackbarHost = {SnackbarHost (hostState = snackbarHostState)},
 
         // Barra inferior
         bottomBar = { },
@@ -91,6 +102,16 @@ fun CustomScaffold() {
         content = { paddingValues ->
             Column(Modifier.padding(paddingValues)) {
                 Greeting(name = "Hola")
+                Button(onClick = {
+                    corutina.launch {
+                        snackbarHostState.showSnackbar(
+                            "Has pulado la App"
+                        )
+                    }
+                }) {
+                    Text(text = "Show SnackBar")
+                }
+
             }
         }
     )
@@ -221,5 +242,6 @@ fun MyTopAppBarLarge() {
         )
     )
 }
+
 
 
