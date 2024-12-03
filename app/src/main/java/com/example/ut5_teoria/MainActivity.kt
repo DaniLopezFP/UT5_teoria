@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,18 +18,25 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -75,47 +83,93 @@ fun GreetingPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomScaffold() {
     val snackbarHostState = remember { SnackbarHostState() }
     val corutina = rememberCoroutineScope()
+    val MydrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val sections = listOf(
+        "Bandeja de entrada",
+        "Enviados",
+        "Archivados",
+        "Favoritos",
+        "Papelera"
+    )
+    ModalNavigationDrawer(
+        drawerState = MydrawerState,
+        gesturesEnabled = false,
+        drawerContent = {
+            ModalDrawerSheet(drawerTonalElevation = 100.dp) {
+                sections.forEach { item ->
+                    NavigationDrawerItem(
+                        label = { Text(item) },
+                        selected = false,
+                        onClick = {
+                            corutina.launch {
+                                MydrawerState.apply {
+                                    if (isClosed) open() else close()
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) {
 
-    Scaffold(
-        // Barra superior
-        topBar = {
-            //MyTopAppBar()
-            MyTopAppBarCenter()
-            // MyTopAppBarSmall()
-            //MyTopAppBarMedium()
-            //MyTopAppBarLarge()
-        },
-        //Snackbar
-        snackbarHost = {SnackbarHost (hostState = snackbarHostState)},
+        Scaffold(
 
-        // Barra inferior
-        bottomBar = { },
+            // Barra superior
+            topBar = {
+                //MyTopAppBar()
+                //MyTopAppBarCenter()
+                // MyTopAppBarSmall()
+                //MyTopAppBarMedium()
+                //MyTopAppBarLarge()
+                MyTopAppBarPers(MydrawerState)// Título de la barra superior
 
-        // Botón flotante personalizado
-        floatingActionButton = { },
 
-        // Contenido principal
-        content = { paddingValues ->
-            Column(Modifier.padding(paddingValues)) {
-                Greeting(name = "Hola")
-                Button(onClick = {
-                    corutina.launch {
-                        snackbarHostState.showSnackbar(
-                            "Has pulado la App"
-                        )
+            },
+            //Snackbar
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+
+            // Barra inferior
+            bottomBar = {
+                MyBottomAppBar()
+            },
+
+            // Botón flotante personalizado
+            floatingActionButton = {
+                //MyFAB()
+                //MySmallFAB()
+                // MyLargeAB()
+                MyExtendedFAB()
+            },
+            floatingActionButtonPosition = FabPosition.Center,
+
+            // Contenido principal
+            content = { paddingValues ->
+                Column(Modifier.padding(paddingValues)) {
+
+                    Greeting(name = "Hola")
+                    Button(onClick = {
+                        corutina.launch {
+                            snackbarHostState.showSnackbar(
+                                "Has pulsado la App"
+                            )
+                        }
+                    }) {
+                        Text(text = "Show SnackBar")
                     }
-                }) {
-                    Text(text = "Show SnackBar")
+
                 }
 
             }
-        }
-    )
+        )
+    }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,7 +180,54 @@ fun MyTopAppBar() {
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MyTopAppBarPers(
+    //onMenuButtonClick: () -> DrawerState, // Acciones a ejecutar
+    //onActionButtonClick: (String) -> Unit
+    //corutina: () -> Unit,
+    drawerState: DrawerState
+) {
+    val corutina = rememberCoroutineScope()
+    TopAppBar(
+        title = {
+            Row(
+                Modifier.padding(10.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "TopAppBar")
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = {
+                /*corutina.launch {
+                    drawerState.open()
+                }*/
+                corutina.launch {
+                    drawerState.apply {
+                        if (isClosed) open() else close()
+                    }
+                }
+            }) {
+                Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+            }
+        },
+        actions = {
+            IconButton(onClick = {
 
+            }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Items")
+            }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        )
+    )
+}
+
+
+//Insertamos una variable que
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopAppBarCenter() {
@@ -145,7 +246,7 @@ fun MyTopAppBarCenter() {
         },
         navigationIcon = {
             IconButton(onClick = {
-                Toast.makeText(contextForToast, "Nav Icon Click", Toast.LENGTH_SHORT).show()
+
             }) {
                 Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
             }
